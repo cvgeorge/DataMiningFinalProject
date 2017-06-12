@@ -3,6 +3,7 @@ from sklearn import tree
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn import svm
+from sklearn.linear_model import perceptron
 import random
 import numpy as np
 import time
@@ -20,13 +21,38 @@ class Combiner(Enum):
 
 class EnsembleObject:
 
-    def __init__(self, training_data, test_data, num_classifiers, combo_method):
+    def __init__(self, training_data, test_data, num_classifiers, combo_method, classifier_layout, single_classifier):
         self.train = training_data
         self.test = test_data
         self.true_test, self.testing_labels = self.format_test_data()
         self.classifier_list = []
-        for x in range(num_classifiers):
-            self.classifier_list.append(self.get_random_classifier())
+        if classifier_layout == "random":
+            for x in range(num_classifiers):
+                self.classifier_list.append(self.get_random_classifier())
+        elif classifier_layout == "uniform":
+            for x in range(num_classifiers):
+                if x < num_classifiers/4: # 4 is the number of classifier types
+                    self.classifier_list.append(tree.DecisionTreeClassifier())
+                elif x >= num_classifiers/4 and x < 2 * (num_classifiers/4): # 4 is the number of classifier types
+                    self.classifier_list.append(svm.SVC())
+                elif x >= 2 * (num_classifiers/4) and x < 3 * (num_classifiers/4): # 4 is the number of classifier types
+                    self.classifier_list.append(GaussianNB())
+                else:
+                    self.classifier_list.append(perceptron.Perceptron())
+        elif classifier_layout == "single":
+            for x in range(num_classifiers):
+                if single_classifier == "perceptron":
+                    self.classifier_list.append(perceptron.Perceptron())
+                elif single_classifier == "svm":
+                    self.classifier_list.append(svm.SVC())
+                elif single_classifier == "gaussian":
+                    self.classifier_list.append(GaussianNB())
+                elif single_classifier == "decisiontree":
+                    self.classifier_list.append(tree.DecisionTreeClassifier())
+                else:
+                    print("NO SUCH CLASSIFIER")
+
+
         self.combination = combo_method
         self.combiner = None
         if combo_method == Combiner.NEURAL_NET:
@@ -48,6 +74,8 @@ class EnsembleObject:
             return svm.SVC()
         if classifier_type == 2:
             return GaussianNB()
+        if classifier_type == 3:
+            return perceptron.Perceptron()
 
 
     def format_test_data(self):

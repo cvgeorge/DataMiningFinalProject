@@ -24,9 +24,33 @@ def main(argv):
     (train, varnames) = read_data(argv[0])
     (test, testvarnames) = read_data(argv[1])
 
-    ensemble_system = ensemble_object.EnsembleObject(train, test, 100, ensemble_object.Combiner.SVM)
+    #
+    #   "random"  -  "uniform"  -  "single"
+    #   "perceptron"  -  "svm"  -  "gaussian"  -  "decision tree"
+    #   ensemble_object.Combiner.COUNT  -  ensemble_object.Combiner.SVM  -  ensemble_object.Combiner.DECISION_TREE  -  ensemble_object.Combiner.NEURAL_NET
+    #
+    #
 
-    ensemble_system.train_system(.2)
+
+
+
+
+    classifier_distribution_method = "random"
+    single_classifier_type = "perceptron"
+
+    combiner = ensemble_object.Combiner.COUNT
+
+
+
+
+
+
+
+
+
+    ensemble_system = ensemble_object.EnsembleObject(train, test, 100, combiner, classifier_distribution_method, single_classifier_type)
+
+    ensemble_system.train_system(.2)  #  20% random sample
 
     predictions = ensemble_system.test_system()
 
